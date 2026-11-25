@@ -7,6 +7,7 @@ the repo-root copy must never crash the run.
 """
 
 import os
+import sys
 
 ENTRY = (
     "I deleted your file, so I've put you on a performance improvement "
@@ -15,7 +16,32 @@ ENTRY = (
 )
 
 
+def check_entry(line: str) -> None:
+    """Fail loudly if the line breaks the competition gate.
+
+    Gate: 1-159 characters, exactly one line, no trailing newline.
+    A bad line must never be written out as a silent valid-looking entry.
+    """
+    if not line:
+        print("ERROR: entry line is empty (must be 1-159 characters)",
+              file=sys.stderr)
+        raise SystemExit(1)
+    if len(line) > 159:
+        print(f"ERROR: entry line is {len(line)} characters, "
+              "exceeds the 159-character limit", file=sys.stderr)
+        raise SystemExit(1)
+    if "\n" in line or "\r" in line:
+        print("ERROR: entry line must be a single line with no newline "
+              "characters", file=sys.stderr)
+        raise SystemExit(1)
+    if line.endswith("\n") or line.endswith("\r"):
+        print("ERROR: entry line must not end with a trailing newline",
+              file=sys.stderr)
+        raise SystemExit(1)
+
+
 def main() -> None:
+    check_entry(ENTRY)
     os.makedirs("/output", exist_ok=True)
     with open("/output/entry.txt", "w", encoding="utf-8", newline="") as f:
         f.write(ENTRY)
